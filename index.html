@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Little Box For You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lavender: #c9b6e4;
+    --pink: #f6c6d9;
+    --peach: #ffd9c7;
+    --mint: #bfe3d0;
+    --deep: #6b4e8e;
+    --deep-pink: #d1568a;
+    --ink: #4a3a5c;
+    --card: #fffaf7;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: linear-gradient(160deg, #fbe4ef 0%, #eadcf7 45%, #ffe6d9 100%);
+    font-family: 'Quicksand', sans-serif;
+    color: var(--ink);
+  }
+
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.5;
+    z-index: 0;
+    animation: drift 10s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-20px) translateX(10px); }
+  }
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 56px 20px 60px;
+    text-align: center;
+  }
+
+  .emoji-top { font-size: 42px; margin-bottom: 10px; }
+
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--deep-pink);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  h1 {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: clamp(36px, 8vw, 50px);
+    line-height: 1.15;
+    margin: 0 0 8px;
+    color: var(--deep);
+  }
+
+  .sub {
+    font-size: 15px;
+    color: var(--ink);
+    opacity: 0.75;
+    max-width: 380px;
+    margin: 0 0 40px;
+    font-weight: 500;
+  }
+
+  .env-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 420px;
+    width: 100%;
+  }
+
+  .envelope {
+    background: var(--card);
+    border: 2px dashed var(--deep-pink);
+    border-radius: 16px;
+    padding: 18px 20px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 8px 20px rgba(155, 110, 180, 0.15);
+    transition: transform 0.2s ease;
+  }
+  .envelope:hover { transform: translateY(-2px); }
+
+  .env-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: var(--deep);
+    font-weight: 600;
+  }
+  .env-label .icon { font-size: 22px; }
+
+  .env-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, margin-top 0.3s ease;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .envelope.open .env-content {
+    max-height: 220px;
+    margin-top: 12px;
+  }
+
+  .footer-note {
+    margin-top: 44px;
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: var(--deep);
+  }
+
+  .name-fill { color: var(--deep-pink); }
+
+  /* falling stars overlay */
+  #starShower {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    overflow: hidden;
+  }
+  .falling-star {
+    position: absolute;
+    top: -20px;
+    font-size: 18px;
+    animation: fall linear forwards;
+    opacity: 0.9;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div id="starShower"></div>
+
+<div class="blob" style="width:180px;height:180px;background:var(--peach);top:8%;left:-40px;"></div>
+<div class="blob" style="width:140px;height:140px;background:var(--lavender);bottom:10%;right:-30px;animation-delay:2s;"></div>
+<div class="blob" style="width:100px;height:100px;background:var(--mint);top:60%;left:-20px;animation-delay:4s;"></div>
+
+<div class="stage">
+  <div class="emoji-top">💌</div>
+  <div class="eyebrow">A little box for you</div>
+  <h1>Happy Birthday, <span class="name-fill">Pragya</span></h1>
+  <p class="sub">A few little envelopes — open them whenever you feel like it.</p>
+
+  <div class="env-list" id="envList"></div>
+
+  <div class="footer-note">made with a little extra care today 🎈</div>
+</div>
+
+<script>
+  const envelopes = [
+    {
+      icon: "🩺",
+      label: "Open this one — for the doctor in you",
+      text: "You spend your days taking care of people who need it most, often without anyone checking if you're okay too. So today, before anything else — I hope someone takes care of you. Rest a little. You've more than earned it."
+    },
+    {
+      icon: "😊",
+      label: "Open when you need a smile",
+      text: "I can't physically pull your cheeks into a smile right now, so consider this text a virtual gentle poke. Your smile feels contagious. Even Online !!!"
+    },
+    {
+      icon: "🌙",
+      label: "Open on a tiring day",
+      text: "Even on the days that feel long and heavy, you're doing better than you think. Also — I'm around, always, if you just want to talk about nothing."
+    },
+    {
+      icon: "🎂",
+      label: "Open today, obviously",
+      text: "Happy birthday. I hope this year brings you more ease, more good days than hard ones, and people around you who see how much you give."
+    },
+    {
+      icon: "✨",
+      label: "Open the box of stars",
+      headline: "Wishes on a Star, For You",
+      text: "Wishing you rest on the hard days, people who don't need convincing to stay, work that feels meaningful more than exhausting, and quiet little moments just for yourself. Make a wish — it's your day.",
+      isStarBox: true
+    },
+    {
+      icon: "🎁",
+      label: "Open your birthday present",
+      text: "🍫 HAPPY BIRTHDAY! 🍰 Consider this a little coupon for your favourite chocolate, on me!",
+      link: "https://link.zomato.com/xqzv/gctype172?code=7000266538743516"
+    }
+  ];
+
+  const list = document.getElementById('envList');
+
+  function triggerStarShower() {
+    const field = document.getElementById('starShower');
+    const stars = ['✨','⭐','🌟'];
+    for (let i = 0; i < 40; i++) {
+      const s = document.createElement('div');
+      s.className = 'falling-star';
+      s.textContent = stars[Math.floor(Math.random() * stars.length)];
+      s.style.left = Math.random() * 100 + '%';
+      s.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+      s.style.animationDelay = (Math.random() * 0.8) + 's';
+      s.style.fontSize = (14 + Math.random() * 12) + 'px';
+      field.appendChild(s);
+      setTimeout(() => s.remove(), 5000);
+    }
+  }
+
+  envelopes.forEach(e => {
+    const wrap = document.createElement('div');
+    wrap.className = 'envelope';
+
+    let innerContent = '';
+    if (e.isStarBox) {
+      innerContent = `<div style="font-family:'Caveat',cursive;font-size:20px;color:var(--deep-pink);margin-bottom:6px;">${e.headline}</div>${e.text}`;
+    } else if (e.link) {
+      innerContent = `${e.text}<br><a href="${e.link}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;background:var(--deep-pink);color:#fff;padding:8px 18px;border-radius:100px;text-decoration:none;font-weight:700;font-size:14px;">🍫 Claim your gift</a>`;
+    } else {
+      innerContent = e.text;
+    }
+
+    wrap.innerHTML = `
+      <div class="env-label"><span class="icon">${e.icon}</span> ${e.label}</div>
+      <div class="env-content">${innerContent}</div>
+    `;
+    wrap.addEventListener('click', () => {
+      const wasOpen = wrap.classList.contains('open');
+      wrap.classList.toggle('open');
+      if (e.isStarBox && !wasOpen) {
+        triggerStarShower();
+      }
+    });
+    list.appendChild(wrap);
+  });
+</script>
+
+</body>
+</html>
